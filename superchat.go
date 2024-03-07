@@ -49,14 +49,23 @@ func readMessages(filename string) string {
 	return string(b)
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func chatHandler(w http.ResponseWriter, r *http.Request) {
 	messages := map[string]interface{}{"messages": readMessages("messages.txt")}
 
 	t, _ := template.ParseFiles(htmlFilename)
 	t.Execute(w, messages)
 }
 
+func saveHandler(w http.ResponseWriter, r *http.Request) {
+	//title := r.URL.Path[len("/save/"):]
+	body := r.FormValue("body")
+	//p := &Page{Title: title, Body: []byte(body)}
+	addMessage("messages.txt", body)
+	http.Redirect(w, r, "/chat", http.StatusFound)
+}
+
 func main() {
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/chat", chatHandler)
+	http.HandleFunc("/send", saveHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

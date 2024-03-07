@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8"; http-equiv="refresh" content="1">
+    <meta charset="utf-8">
     <title>Superchat</title>
   </head>
   <body>
@@ -11,5 +11,10 @@
 	<div style="height:360px;width:480px;border:1px solid #ccc;font:16px/26px Georgia, Garamond, Serif;overflow:auto;">
 	  <pre>{{.messages}}</pre>
 	</div>
+
+    <form action="/send" method="POST">
+      <div><textarea name="body" rows="2" cols="20"></textarea></div>
+      <div><input type="submit" value="Send"></div>
+      </form>
   </body>
 </html>
