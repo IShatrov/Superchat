@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -20,46 +19,61 @@ const (
 	timeFormat = "2006-01-02 15:04:05"
 )
 
-func addMessage(filename string, message string) {
+func addMessage(filename string, message string) error {
 	file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
+	defer file.Close()
+
 	if err != nil {
-		panic(fmt.Sprintf("Failed to open file " + filename))
+		return err
 	}
 
 	fileInfo, err := file.Stat()
 
 	if err != nil {
-		panic(fmt.Sprintf("Failed to get stat for file " + filename))
+		return err
 	}
 
 	if fileInfo.Size() != 0 {
 		if _, err := file.WriteString(msgSep); err != nil {
-			panic(fmt.Sprintf("Failed to write message separator in file " + filename))
+			return err
 		}
 	}
 
 	if _, err := file.WriteString(message); err != nil {
-		panic(fmt.Sprintf("Failed to write message " + message + " in file " + filename))
+		return err
 	}
 
-	defer file.Close()
+	return nil
 }
 
-func readMessages(filename string) string {
+func readMessages(filename string) (string, error) {
 	b, err := os.ReadFile(filename)
 
 	if err != nil {
-		panic(fmt.Sprintf("Failed to read file " + filename))
+		return "", nil
 	}
 
-	return string(b)
+	return string(b), nil
 }
 
 func chatHandler(w http.ResponseWriter, r *http.Request) {
-	messages := map[string]interface{}{"messages": readMessages("messages.txt")}
+	text, err := readMessages("messages.txt")
 
-	t, _ := template.ParseFiles(htmlFilename)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	messages := map[string]interface{}{"messages": text}
+
+	t, err := template.ParseFiles(htmlFilename)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	t.Execute(w, messages)
 }
 
@@ -68,7 +82,12 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 
 	t := time.Now()
 
-	addMessage("messages.txt", t.Format(timeFormat)+" "+body)
+	err := addMessage("messages.txt", t.Format(timeFormat)+" "+body)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	http.Redirect(w, r, chatPath, http.StatusFound)
 }
