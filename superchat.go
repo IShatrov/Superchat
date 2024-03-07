@@ -5,6 +5,10 @@ import (
 	"os"
 )
 
+const (
+	msgSep = "\n"
+)
+
 func addMessage(filename string, message string) {
 	file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
@@ -19,7 +23,7 @@ func addMessage(filename string, message string) {
 	}
 
 	if fileInfo.Size() != 0 {
-		if _, err := file.Write([]byte("\n")); err != nil {
+		if _, err := file.Write([]byte(msgSep)); err != nil {
 			file.Close()
 			log.Fatal(err)
 		}
