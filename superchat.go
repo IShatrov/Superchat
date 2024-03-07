@@ -9,9 +9,14 @@ import (
 )
 
 const (
-	msgSep = "\n"
+	msgSep      = "\n"
+	msgFilename = "messages.txt"
 
 	htmlFilename = "index.html"
+	htmlBody     = "body"
+	htmlMessages = "messages"
+
+	port = ":8080"
 
 	chatPath = "/chat"
 	sendPath = "/send"
@@ -58,14 +63,14 @@ func readMessages(filename string) (string, error) {
 }
 
 func chatHandler(w http.ResponseWriter, r *http.Request) {
-	text, err := readMessages("messages.txt")
+	text, err := readMessages(msgFilename)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	messages := map[string]interface{}{"messages": text}
+	messages := map[string]interface{}{htmlMessages: text}
 
 	t, err := template.ParseFiles(htmlFilename)
 
@@ -78,11 +83,11 @@ func chatHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func saveHandler(w http.ResponseWriter, r *http.Request) {
-	body := r.FormValue("body")
+	body := r.FormValue(htmlBody)
 
 	t := time.Now()
 
-	err := addMessage("messages.txt", t.Format(timeFormat)+" "+body)
+	err := addMessage(msgFilename, t.Format(timeFormat)+" "+body)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -95,5 +100,5 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc(chatPath, chatHandler)
 	http.HandleFunc(sendPath, saveHandler)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(port, nil))
 }
