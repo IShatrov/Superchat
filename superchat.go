@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"os"
 )
 
@@ -13,30 +13,26 @@ func addMessage(filename string, message string) {
 	file, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
 	if err != nil {
-		log.Fatal(err)
+		panic(fmt.Sprintf("Failed to open file " + filename))
 	}
 
 	fileInfo, err := file.Stat()
 
 	if err != nil {
-		log.Fatal(err)
+		panic(fmt.Sprintf("Failed to get stat for file " + filename))
 	}
 
 	if fileInfo.Size() != 0 {
 		if _, err := file.WriteString(msgSep); err != nil {
-			file.Close()
-			log.Fatal(err)
+			panic(fmt.Sprintf("Failed to write message separator in file " + filename))
 		}
 	}
 
 	if _, err := file.WriteString(message); err != nil {
-		file.Close()
-		log.Fatal(err)
+		panic(fmt.Sprintf("Failed to write message " + message + " in file " + filename))
 	}
 
-	if err := file.Close(); err != nil {
-		log.Fatal(err)
-	}
+	defer file.Close()
 }
 
 func main() {
