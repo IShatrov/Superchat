@@ -9,8 +9,12 @@ import (
 )
 
 const (
-	msgSep       = "\n"
+	msgSep = "\n"
+
 	htmlFilename = "index.html"
+
+	chatPath = "/chat"
+	sendPath = "/send"
 )
 
 func addMessage(filename string, message string) {
@@ -57,15 +61,15 @@ func chatHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func saveHandler(w http.ResponseWriter, r *http.Request) {
-	//title := r.URL.Path[len("/save/"):]
 	body := r.FormValue("body")
-	//p := &Page{Title: title, Body: []byte(body)}
+
 	addMessage("messages.txt", body)
-	http.Redirect(w, r, "/chat", http.StatusFound)
+
+	http.Redirect(w, r, chatPath, http.StatusFound)
 }
 
 func main() {
-	http.HandleFunc("/chat", chatHandler)
-	http.HandleFunc("/send", saveHandler)
+	http.HandleFunc(chatPath, chatHandler)
+	http.HandleFunc(sendPath, saveHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
