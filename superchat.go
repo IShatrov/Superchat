@@ -23,13 +23,13 @@ func addMessage(filename string, message string) {
 	}
 
 	if fileInfo.Size() != 0 {
-		if _, err := file.Write([]byte(msgSep)); err != nil {
+		if _, err := file.WriteString(msgSep); err != nil {
 			file.Close()
 			log.Fatal(err)
 		}
 	}
 
-	if _, err := file.Write([]byte(message)); err != nil {
+	if _, err := file.WriteString(message); err != nil {
 		file.Close()
 		log.Fatal(err)
 	}
