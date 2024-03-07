@@ -2,11 +2,15 @@ package main
 
 import (
 	"fmt"
+	"html/template"
+	"log"
+	"net/http"
 	"os"
 )
 
 const (
-	msgSep = "\n"
+	msgSep       = "\n"
+	htmlFilename = "index.html"
 )
 
 func addMessage(filename string, message string) {
@@ -35,6 +39,24 @@ func addMessage(filename string, message string) {
 	defer file.Close()
 }
 
+func readMessages(filename string) string {
+	b, err := os.ReadFile(filename)
+
+	if err != nil {
+		panic(fmt.Sprintf("Failed to read file " + filename))
+	}
+
+	return string(b)
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	messages := map[string]interface{}{"messages": readMessages("messages.txt")}
+
+	t, _ := template.ParseFiles(htmlFilename)
+	t.Execute(w, messages)
+}
+
 func main() {
-	addMessage("test.txt", "hi")
+	http.HandleFunc("/", handler)
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
