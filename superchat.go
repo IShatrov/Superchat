@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 )
 
 const (
@@ -15,6 +16,8 @@ const (
 
 	chatPath = "/chat"
 	sendPath = "/send"
+
+	timeFormat = "2006-01-02 15:04:05"
 )
 
 func addMessage(filename string, message string) {
@@ -63,7 +66,9 @@ func chatHandler(w http.ResponseWriter, r *http.Request) {
 func saveHandler(w http.ResponseWriter, r *http.Request) {
 	body := r.FormValue("body")
 
-	addMessage("messages.txt", body)
+	t := time.Now()
+
+	addMessage("messages.txt", t.Format(timeFormat)+" "+body)
 
 	http.Redirect(w, r, chatPath, http.StatusFound)
 }
